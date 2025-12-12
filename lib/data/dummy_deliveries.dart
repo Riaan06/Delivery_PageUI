@@ -1,0 +1,58 @@
+import '../models/delivery_model.dart';
+
+final List<DeliveryModel> dummyDeliveries = [
+  DeliveryModel(
+    id: '1',
+    customerName: 'Amit Sharma',
+    item: 'Lunch Box',
+    address: 'Room 304, Hostel-B, IIT Campus, Near Gate 2, Mumbai',
+    eta: '12 mins',
+    pickupSlot: '10:15 - 10:45 AM',
+    status: 'Pending',
+  ),
+  DeliveryModel(
+    id: '2',
+    customerName: 'Priya Patel',
+    item: 'Lunch Box',
+    address: 'Room 205, Hostel-A, Near Library',
+    eta: '20 mins',
+    pickupSlot: '10:15 - 10:45 AM',
+    status: 'Pending',
+  ),
+  DeliveryModel(
+    id: '3',
+    customerName: 'Rahul Verma',
+    item: 'Dinner Box',
+    address: 'Room 101, PG House, Main Road',
+    eta: '25 mins',
+    pickupSlot: 'N/A',
+    status: 'Pending',
+  ),
+  DeliveryModel(
+    id: '4',
+    customerName: 'Sneha Desai',
+    item: 'Lunch Box',
+    address: 'Flat 302, Silver Apartments',
+    eta: 'Delivered',
+    pickupSlot: 'N/A',
+    status: 'Completed',
+  ),
+  DeliveryModel(
+    id: '5',
+    customerName: 'Karan Singh',
+    item: 'Lunch Box',
+    address: 'Room 404, Boys Hostel',
+    eta: 'Delivered',
+    pickupSlot: 'N/A',
+    status: 'Completed',
+  ),
+  DeliveryModel(
+    id: '6',
+    customerName: 'Anjali Gupta',
+    item: 'Dinner Box',
+    address: 'Room 202, Girls Hostel-C',
+    eta: 'Cancelled',
+    pickupSlot: 'N/A',
+    status: 'Cancelled',
+  ),
+];
