@@ -1,8 +1,10 @@
 // lib/screens/profile/profile_page.dart
 import 'package:deliveryui/screens/profile/profile_controller.dart';
+import 'package:deliveryui/screens/profile/widgets/logout_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../auth/login_page.dart';
 import 'widgets/profile_header.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -16,8 +18,10 @@ class ProfilePage extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[50],
             appBar: AppBar(
-              title: const Text('Profile',
-                  style: TextStyle(color: Colors.black)),
+              title: const Text(
+                'Profile',
+                style: TextStyle(color: Colors.black),
+              ),
               backgroundColor: Colors.white,
               elevation: 0,
             ),
@@ -28,8 +32,10 @@ class ProfilePage extends StatelessWidget {
         return Scaffold(
           backgroundColor: Colors.grey[50],
           appBar: AppBar(
-            title: const Text('Profile',
-                style: TextStyle(color: Colors.black)),
+            title: const Text(
+              'Profile',
+              style: TextStyle(color: Colors.black),
+            ),
             backgroundColor: Colors.white,
             elevation: 0,
           ),
@@ -39,13 +45,13 @@ class ProfilePage extends StatelessWidget {
               children: [
                 ProfileHeader(
                   name: controller.name,
-                  memberSince: 'Jan 2023',
+                  memberSince: 'Dec 2025',
                   location: controller.email,
                   imageUrl: controller.profilePic,
+                  onChangePhoto: () => controller.changeProfilePhoto(context),
                 ),
                 const SizedBox(height: 16),
 
-                // Example: tap to change name
                 ElevatedButton(
                   onPressed: () async {
                     final newName = await _askName(context, controller.name);
@@ -58,29 +64,31 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // Rest of your existing cards: delivery overview, wallet,
-                // documents, settings, support, etc., unchanged.
+                // your other tiles / options here...
 
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
+                  child: LogoutButton(
+                    onLogout: () async {
                       await controller.logout();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Logged out successfully'),
-                          ),
-                        );
-                      }
+
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('isLoggedIn', false);
+
+                      if (!context.mounted) return;
+
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                            (route) => false,
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Logged out successfully')),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      minimumSize: const Size.fromHeight(50),
-                    ),
-                    child: const Text('Logout'),
                   ),
+
                 ),
               ],
             ),
