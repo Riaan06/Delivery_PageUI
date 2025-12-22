@@ -1,3 +1,4 @@
+// lib/data/repository/user_repository.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -5,16 +6,15 @@ import '../../models/user_model.dart';
 import 'dummy_data.dart';
 
 class UserRepository {
-  final String baseUrl;
+  /// Full URL to sir's login.php
+  final String loginUrl;
 
-  UserRepository({this.baseUrl = "dummy"});
+  UserRepository({
+    this.loginUrl = "https://svtechshant.com/tiffin/api/login.php",
+  });
 
-  // -----------------------------
-  // LOCAL DUMMY USER (already in your project)
-  // -----------------------------
-  UserModel getUser() {
-    return DummyData.user;
-  }
+  // -------- dummy helpers (keep existing UI working) --------
+  UserModel getUser() => DummyData.user;
 
   Future<UserModel> getUserProfile() async {
     await Future.delayed(const Duration(milliseconds: 500));
@@ -33,67 +33,83 @@ class UserRepository {
     DummyData.user = DummyData.user.copyWith(profilePic: newUrl);
   }
 
-  // --------------------------------------------------
-  // REAL LOGIN (uses sir's API) + DUMMY FALLBACK LOGIN
-  // --------------------------------------------------
+  // ---------------- REAL LOGIN (login.php) ----------------
   Future<UserModel> login({
     required String email,
     required String password,
   }) async {
-    // If sir's API base URL is empty or placeholder → use dummy login
-    if (baseUrl == "dummy" || baseUrl.isEmpty || baseUrl.contains("API_For_Login")) {
-      return _dummyLogin(email, password);
-    }
-
-    final url = Uri.parse("$baseUrl/login"); // change to sir's actual endpoint
+    final uri = Uri.parse(loginUrl);
 
     try {
       final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode({
-          "email": email,       // change key names if sir uses "username" or "mobile"
-          "password": password,
+          'email': email,
+          'password': password,
         }),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        final user = UserModel.fromJson(data);
-
-        // keep DummyData in sync so other parts of app still work
-        DummyData.user = user;
-
-        return user;
-      } else {
-        throw Exception("Invalid credentials (code: ${response.statusCode})");
+      if (response.statusCode != 200) {
+        throw Exception('Server error: ${response.statusCode}');
       }
-    } catch (e) {
-      throw Exception("Login failed: $e");
-    }
-  }
 
-  // -----------------------------
-  // DUMMY LOGIN (No API from sir)
-  // -----------------------------
-  Future<UserModel> _dummyLogin(String email, String password) async {
-    await Future.delayed(const Duration(milliseconds: 600));
+      final data = jsonDecode(response.body);
 
-    if (email == "deliveryboy@gmail.com" && password == "123456") {
+      if (data['status'] != 'success') {
+        final msg = data['message']?.toString() ?? 'Invalid email or password';
+        throw Exception(msg);
+      }
+
+      final int userId = data['user_id'] is int
+          ? data['user_id'] as int
+          : int.tryParse(data['user_id'].toString()) ?? 0;
+
       final user = UserModel(
-        id: 123,
-        name: "Delivery Boy",
+        id: userId,
+        name: DummyData.user.name, // temporary until backend returns name
         email: email,
-        phone: "1234567890",
+        phone: DummyData.user.phone,
         profilePic: DummyData.user.profilePic,
       );
 
-      DummyData.user = user;
+      DummyData.user = user; // keep dummy in sync
 
       return user;
+    } catch (e) {
+      throw Exception('Login failed: $e');
+    }
+  }
+
+  // ---------------- SIGNUP (signup.php) ----------------
+  Future<void> signup({
+    required String username,
+    required String email,
+    required String password,
+  }) async {
+    final uri = Uri.parse('https://svtechshant.com/tiffin/api/signup.php');
+
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Signup failed: ${response.statusCode}');
     }
 
-    throw Exception("Invalid email or password");
+    final data = jsonDecode(response.body);
+
+    // Example expected: { "status": "success", "message": "Registered" }
+    if (data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Signup failed');
+    }
   }
 }

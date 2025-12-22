@@ -2,13 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../models/user_model.dart';
+import '../../data/repository/user_repository.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController() {
-    _loadCurrentUser(); // load user when app starts
+    _loadCurrentUser(); // only matters if you still use Firebase signup
   }
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final UserRepository _userRepo = UserRepository();
 
   bool _loading = false;
   String? _error;
@@ -18,10 +20,9 @@ class AuthController extends ChangeNotifier {
   String? get error => _error;
   UserModel? get user => _user;
 
-  // Load existing Firebase user on app start / restart
   Future<void> _loadCurrentUser() async {
     final firebaseUser = _auth.currentUser;
-    if (firebaseUser != null) {
+    if (firebaseUser != null && _user == null) {
       _user = UserModel(
         id: 0,
         name: firebaseUser.displayName ??
@@ -35,38 +36,18 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  /// LOGIN USING backend login.php
   Future<bool> login(String email, String password) async {
     _loading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final cred = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      final firebaseUser = cred.user;
-
-      if (firebaseUser != null) {
-        _user = UserModel(
-          id: 0,
-          name: firebaseUser.displayName ??
-              firebaseUser.email ??
-              'Delivery Partner',
-          email: firebaseUser.email ?? '',
-          phone: '',
-          profilePic: firebaseUser.photoURL ?? '',
-        );
-      }
-
+      final user = await _userRepo.login(email: email, password: password);
+      _user = user;
       _loading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
-      _loading = false;
-      _error = e.message ?? 'Firebase auth error';
-      notifyListeners();
-      return false;
     } catch (e) {
       _loading = false;
       _error = e.toString();
@@ -75,43 +56,25 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  // sign up with name
+  /// SIGNUP – if backend handles signup, you can remove Firebase here later
   Future<bool> signup(String name, String email, String password) async {
+    // You can either:
+    // 1) Call _userRepo.signup(...) here and not use Firebase at all, OR
+    // 2) Keep Firebase signup as earlier.
+    // For now, use backend signup only:
     _loading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final cred = await _auth.createUserWithEmailAndPassword(
+      await _userRepo.signup(
+        username: name,
         email: email,
         password: password,
       );
-
-      final firebaseUser = cred.user;
-
-      if (firebaseUser != null) {
-        // set Firebase Auth displayName
-        await firebaseUser.updateDisplayName(name);
-        await firebaseUser.reload();
-        final refreshed = _auth.currentUser;
-
-        _user = UserModel(
-          id: 0,
-          name: refreshed?.displayName ?? name,
-          email: refreshed?.email ?? email,
-          phone: '',
-          profilePic: refreshed?.photoURL ?? '',
-        );
-      }
-
       _loading = false;
       notifyListeners();
       return true;
-    } on FirebaseAuthException catch (e) {
-      _loading = false;
-      _error = e.message ?? 'Firebase auth error';
-      notifyListeners();
-      return false;
     } catch (e) {
       _loading = false;
       _error = e.toString();
@@ -121,7 +84,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _auth.signOut();
+    await _auth.signOut(); // optional, if you still use Firebase
     _user = null;
     notifyListeners();
   }
