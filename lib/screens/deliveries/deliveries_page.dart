@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'deliveries_controller.dart';
+import '../../models/delivery_model.dart';
+import 'widgets/delivery_tile.dart'; // Import your existing DeliveryTile
 
 class DeliveriesPage extends StatelessWidget {
   const DeliveriesPage({super.key});
@@ -34,16 +36,19 @@ class DeliveriesPage extends StatelessWidget {
         child: Column(
           children: [
             // Tabs
-            Row(
-              children: [
-                _chip(context, 'All'),
-                const SizedBox(width: 5),
-                _chip(context, 'Pending'),
-                const SizedBox(width: 5),
-                _chip(context, 'Completed'),
-                const SizedBox(width: 5),
-                _chip(context, 'Cancelled'),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _chip(context, 'All'),
+                  const SizedBox(width: 8),
+                  _chip(context, 'Pending'),
+                  const SizedBox(width: 8),
+                  _chip(context, 'Completed'),
+                  const SizedBox(width: 8),
+                  _chip(context, 'Cancelled'),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -60,7 +65,7 @@ class DeliveriesPage extends StatelessWidget {
                   _summaryItem(
                     Icons.assignment,
                     '${controller.totalCount}',
-                    'Total Assigned',
+                    'Total',
                   ),
                   _summaryItem(
                     Icons.check_circle,
@@ -97,7 +102,7 @@ class DeliveriesPage extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.sort),
-                    label: const Text('Sort by Time'),
+                    label: const Text('Sort'),
                   ),
                 ),
               ],
@@ -107,58 +112,29 @@ class DeliveriesPage extends StatelessWidget {
 
             // List
             Expanded(
-              child: ListView.builder(
+              child: deliveries.isEmpty
+                  ? Center(
+                child: Text(
+                  'No deliveries found',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              )
+                  : ListView.builder(
                 itemCount: deliveries.length,
                 itemBuilder: (context, index) {
                   final d = deliveries[index];
                   return DeliveryTile(
                     delivery: d,
                     onTap: () {
-                      // Example dynamic actions
                       showModalBottomSheet(
                         context: context,
-                        builder: (_) => _DeliveryActionsSheet(deliveryId: d.id),
+                        builder: (_) => _DeliveryActionsSheet(
+                          deliveryId: d.id,
+                        ),
                       );
                     },
                   );
                 },
-              ),
-            ),
-
-            // Help section
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.help_outline,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Need Help? Stay on time to earn incentives!',
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    child: const Text('Support'),
-                  ),
-                ],
               ),
             ),
           ],
@@ -174,8 +150,7 @@ class DeliveriesPage extends StatelessWidget {
     return GestureDetector(
       onTap: () => controller.changeFilter(label),
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         decoration: BoxDecoration(
           color: selected ? Colors.green : Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -187,6 +162,7 @@ class DeliveriesPage extends StatelessWidget {
           label,
           style: TextStyle(
             color: selected ? Colors.white : Colors.black,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
       ),
@@ -194,23 +170,31 @@ class DeliveriesPage extends StatelessWidget {
   }
 
   Widget _summaryItem(IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.blue),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Colors.grey,
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.blue, size: 24),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -218,7 +202,7 @@ class DeliveriesPage extends StatelessWidget {
 class _DeliveryActionsSheet extends StatelessWidget {
   final String deliveryId;
 
-  const _DeliveryActionsSheet({super.key, required this.deliveryId});
+  const _DeliveryActionsSheet({required this.deliveryId});
 
   @override
   Widget build(BuildContext context) {

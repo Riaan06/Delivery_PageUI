@@ -6,7 +6,7 @@ import '../../data/repository/user_repository.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController() {
-    _loadCurrentUser(); // only matters if you still use Firebase signup
+    _loadCurrentUser();
   }
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -58,10 +58,6 @@ class AuthController extends ChangeNotifier {
 
   /// SIGNUP – if backend handles signup, you can remove Firebase here later
   Future<bool> signup(String name, String email, String password) async {
-    // You can either:
-    // 1) Call _userRepo.signup(...) here and not use Firebase at all, OR
-    // 2) Keep Firebase signup as earlier.
-    // For now, use backend signup only:
     _loading = true;
     _error = null;
     notifyListeners();
@@ -84,7 +80,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _auth.signOut(); // optional, if you still use Firebase
+    await _auth.signOut();
     _user = null;
     notifyListeners();
   }

@@ -1,4 +1,3 @@
-// lib/controllers/profile_controller.dart
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -73,7 +72,7 @@ class ProfileController extends ChangeNotifier {
     final XFile? picked = await _picker.pickImage(source: source);
     if (picked == null) return;
 
-    final String path = picked.path; // local file path
+    final String path = picked.path;
 
     await updateProfilePic(path);
   }

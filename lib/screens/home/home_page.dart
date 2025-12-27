@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'home_controller.dart';
@@ -27,6 +28,13 @@ class HomePage extends StatelessWidget {
 
     final userName = auth.user?.name ?? 'Delivery Partner';
 
+    // Get current date and time
+    final now = DateTime.now();
+    final dateFormat = DateFormat('dd MMM yyyy');
+    final timeFormat = DateFormat('hh:mm a');
+    final currentDate = dateFormat.format(now);
+    final currentTime = timeFormat.format(now);
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -53,7 +61,7 @@ class HomePage extends StatelessWidget {
           children: [
             // Profile Row
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -65,78 +73,62 @@ class HomePage extends StatelessWidget {
                     backgroundColor: Colors.lightBlueAccent,
                   ),
                   const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userName,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Today',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: home.toggleOnline,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isOnline
-                            ? Colors.green.shade600
-                            : Colors.red.shade600,
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isOnline ? Colors.green : Colors.red)
-                                .withOpacity(0.4),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          )
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isOnline ? Icons.flash_on : Icons.flash_off,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            isOnline ? 'Online' : 'Offline',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 12,
+                              color: Colors.grey[600],
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: Icon(
-                              isOnline
-                                  ? Icons.check_circle
-                                  : Icons.pause_circle_filled,
-                              key: ValueKey(isOnline),
-                              size: 16,
-                              color: Colors.white,
+                            const SizedBox(width: 4),
+                            Text(
+                              currentDate,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.access_time,
+                              size: 12,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              currentTime,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Swipe Toggle Button
+            SwipeToggleButton(
+              isOnline: isOnline,
+              onToggle: home.toggleOnline,
             ),
 
             const SizedBox(height: 16),
@@ -173,12 +165,6 @@ class HomePage extends StatelessWidget {
                   value: '₹320',
                   icon: Icons.currency_rupee,
                   color: Colors.purple,
-                ),
-                StatsCard(
-                  title: 'Order Completed',
-                  value: '$completed',
-                  icon: Icons.done_all,
-                  color: Colors.teal,
                 ),
                 StatsCard(
                   title: 'Order Cancelled',
@@ -321,16 +307,159 @@ class HomePage extends StatelessWidget {
                 ),
                 child: Text(
                   '${upcoming.length} pending',
-                  style: const TextStyle(
-                      color: Colors.orange, fontSize: 12),
+                  style: const TextStyle(color: Colors.orange, fontSize: 12),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Column(
-            children:
-            upcoming.map((d) => UpcomingTile(delivery: d)).toList(),
+            children: upcoming.map((d) => UpcomingTile(delivery: d)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---- SWIPE TOGGLE BUTTON WIDGET ----
+class SwipeToggleButton extends StatefulWidget {
+  final bool isOnline;
+  final VoidCallback onToggle;
+
+  const SwipeToggleButton({
+    super.key,
+    required this.isOnline,
+    required this.onToggle,
+  });
+
+  @override
+  State<SwipeToggleButton> createState() => _SwipeToggleButtonState();
+}
+
+class _SwipeToggleButtonState extends State<SwipeToggleButton> {
+  double _dragPosition = 0.0;
+  bool _isDragging = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width - 32; // minus padding
+    final trackWidth = screenWidth;
+    final thumbWidth = screenWidth / 2 - 4;
+    final maxDrag = trackWidth - thumbWidth - 4;
+
+    // Calculate position based on state
+    final targetPosition = widget.isOnline ? maxDrag : 0.0;
+    final currentPosition = _isDragging ? _dragPosition : targetPosition;
+
+    return Container(
+      height: 50,
+      width: trackWidth,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Stack(
+        children: [
+          // Background labels
+          Row(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Offline',
+                    style: TextStyle(
+                      color: !widget.isOnline ? Colors.white : Colors.grey[600],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Online',
+                    style: TextStyle(
+                      color: widget.isOnline ? Colors.white : Colors.grey[600],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Draggable sliding button
+          AnimatedPositioned(
+            duration: _isDragging
+                ? Duration.zero
+                : const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            left: currentPosition + 2,
+            top: 2,
+            child: GestureDetector(
+              onHorizontalDragStart: (details) {
+                setState(() {
+                  _isDragging = true;
+                  _dragPosition = targetPosition;
+                });
+              },
+              onHorizontalDragUpdate: (details) {
+                setState(() {
+                  _dragPosition = (_dragPosition + details.delta.dx)
+                      .clamp(0.0, maxDrag);
+                });
+              },
+              onHorizontalDragEnd: (details) {
+                setState(() {
+                  _isDragging = false;
+                });
+
+                // Determine if toggle should happen
+                if (_dragPosition > maxDrag / 2) {
+                  // Swiped to right (Online)
+                  if (!widget.isOnline) {
+                    widget.onToggle();
+                  }
+                } else {
+                  // Swiped to left (Offline)
+                  if (widget.isOnline) {
+                    widget.onToggle();
+                  }
+                }
+              },
+              onTap: widget.onToggle,
+              child: Container(
+                width: thumbWidth,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: widget.isOnline
+                      ? Colors.green.shade600
+                      : Colors.red.shade600,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      widget.isOnline ? Icons.verified : Icons.do_not_disturb_on,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.isOnline ? 'Online' : 'Offline',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
