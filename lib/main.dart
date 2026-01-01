@@ -7,6 +7,7 @@ import 'package:deliveryui/screens/home/home_controller.dart';
 import 'package:deliveryui/screens/nav/bottom_nav.dart';
 import 'package:deliveryui/screens/nav/nav_controller.dart';
 import 'package:deliveryui/screens/profile/profile_controller.dart';
+import 'package:deliveryui/screens/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -46,12 +47,18 @@ class DeliveryBoyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthController()),
       ],
       child: MaterialApp(
-        title: 'Delivery Boy',
+        title: 'Tiffinity Delivery Partner',
         theme: ThemeData(
           primarySwatch: Colors.green,
           useMaterial3: true,
         ),
-        home: isLoggedIn ? const BottomNav() : const LoginPage(),
+        // ⬇️ START WITH SPLASH SCREEN
+        home: SplashScreen(isLoggedIn: isLoggedIn),
+        // ⬇️ ADD ROUTES
+        routes: {
+          '/home': (context) => const BottomNav(),
+          '/login': (context) => const LoginPage(),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );

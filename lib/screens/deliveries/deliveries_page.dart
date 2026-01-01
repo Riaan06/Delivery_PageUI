@@ -1,11 +1,9 @@
-// lib/screens/deliveries/deliveries_page.dart
+
 import 'package:deliveryui/screens/deliveries/widgets/delivery_filter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'deliveries_controller.dart';
-import '../../models/delivery_model.dart';
-import 'widgets/delivery_tile.dart'; // Import your existing DeliveryTile
 
 class DeliveriesPage extends StatelessWidget {
   const DeliveriesPage({super.key});
