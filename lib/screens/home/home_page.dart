@@ -10,6 +10,7 @@ import '../../models/delivery_model.dart';
 import 'widgets/upcoming_tile.dart';
 import '../auth/auth_controller.dart';
 import '../map/osm_navigation_screen.dart';
+import '../kyc/kyc_popup_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,13 +20,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool _kycDialogShown = false;
+
   @override
   void initState() {
     super.initState();
     // Request location permission when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestLocationPermission();
+      _checkKYCStatus();
     });
+  }
+
+  void _checkKYCStatus() {
+    if (!_kycDialogShown) {
+      final auth = context.read<AuthController>();
+      if (auth.user != null && !auth.user!.kycCompleted) {
+        _kycDialogShown = true;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const KYCPopupDialog(),
+        );
+      }
+    }
   }
 
   Future<void> _requestLocationPermission() async {

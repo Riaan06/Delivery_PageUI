@@ -6,6 +6,7 @@ class UserModel {
   final String phone;
   final String profilePic;
   final String role;
+  final bool kycCompleted;
 
   UserModel({
     required this.id,
@@ -13,17 +14,23 @@ class UserModel {
     required this.email,
     required this.phone,
     required this.profilePic,
-    this.role = 'delivery_partner', // ✅ Changed from 'customer' to 'delivery_partner'
+    this.role =
+        'delivery_partner', // ✅ Changed from 'customer' to 'delivery_partner'
+    this.kycCompleted = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] ?? "",
       email: json['email'] ?? "",
       phone: json['phone'] ?? "",
       profilePic: json['profilePic'] ?? json['profile_pic'] ?? "",
       role: json['role'] ?? 'delivery_partner', // ✅ Changed default
+      kycCompleted:
+          json['kyc_completed'] == true || json['kycCompleted'] == true,
     );
   }
 
@@ -38,6 +45,7 @@ class UserModel {
       "phone": phone,
       "profilePic": profilePic,
       "role": role,
+      "kyc_completed": kycCompleted,
     };
   }
 
@@ -51,6 +59,7 @@ class UserModel {
     String? phone,
     String? profilePic,
     String? role,
+    bool? kycCompleted,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -59,6 +68,7 @@ class UserModel {
       phone: phone ?? this.phone,
       profilePic: profilePic ?? this.profilePic,
       role: role ?? this.role,
+      kycCompleted: kycCompleted ?? this.kycCompleted,
     );
   }
 }

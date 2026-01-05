@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../data/repository/user_repository.dart';
 import '../nav/bottom_nav.dart';
+import '../kyc/kyc_popup_dialog.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -119,7 +120,10 @@ class _SignupPageState extends State<SignupPage> {
 
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    final phone = _phoneController.text.trim().replaceAll(
+      RegExp(r'[\s\-\(\)]'),
+      '',
+    );
     final password = _passwordController.text.trim();
 
     // Debug: Print all values
@@ -127,7 +131,9 @@ class _SignupPageState extends State<SignupPage> {
     print('Name: $name');
     print('Email: $email');
     print('Phone: $phone');
-    print('Password: ${password.isNotEmpty ? "SET (${password.length} chars)" : "EMPTY"}');
+    print(
+      'Password: ${password.isNotEmpty ? "SET (${password.length} chars)" : "EMPTY"}',
+    );
     print('Role: delivery');
     print('=================================');
 
@@ -188,9 +194,17 @@ class _SignupPageState extends State<SignupPage> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const BottomNav()),
-            (route) => false,
+        (route) => false,
       );
 
+      // Show KYC popup after navigation
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const KYCPopupDialog(),
+      );
     } catch (e) {
       print('❌ ERROR: $e');
 
@@ -198,7 +212,8 @@ class _SignupPageState extends State<SignupPage> {
 
       if (!mounted) return;
 
-      String errorMessage = e.toString()
+      String errorMessage = e
+          .toString()
           .replaceFirst('Exception:', '')
           .replaceFirst('Registration failed:', '')
           .replaceFirst('Login failed:', '')
@@ -290,10 +305,7 @@ class _SignupPageState extends State<SignupPage> {
                       const SizedBox(height: 8),
                       const Text(
                         'Delivery Partner Portal',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white70,
-                        ),
+                        style: TextStyle(fontSize: 18, color: Colors.white70),
                       ),
                       const SizedBox(height: 40),
                       Container(
@@ -323,31 +335,49 @@ class _SignupPageState extends State<SignupPage> {
                                 TextFormField(
                                   controller: _nameController,
                                   validator: _validateName,
-                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                   textCapitalization: TextCapitalization.words,
                                   decoration: InputDecoration(
                                     hintText: 'Enter your full name',
-                                    hintStyle: TextStyle(color: Colors.grey[400]),
-                                    prefixIcon: Icon(Icons.person_outline, color: Colors.grey[600]),
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.person_outline,
+                                      color: Colors.grey[600],
+                                    ),
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF4CAF50),
+                                        width: 2,
+                                      ),
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.red),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -364,31 +394,49 @@ class _SignupPageState extends State<SignupPage> {
                                 TextFormField(
                                   controller: _emailController,
                                   validator: _validateEmail,
-                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
                                     hintText: 'Enter your email',
-                                    hintStyle: TextStyle(color: Colors.grey[400]),
-                                    prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[600]),
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
+                                      color: Colors.grey[600],
+                                    ),
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF4CAF50),
+                                        width: 2,
+                                      ),
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.red),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -405,7 +453,8 @@ class _SignupPageState extends State<SignupPage> {
                                 TextFormField(
                                   controller: _phoneController,
                                   validator: _validatePhone,
-                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                   keyboardType: TextInputType.phone,
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
@@ -413,28 +462,45 @@ class _SignupPageState extends State<SignupPage> {
                                   ],
                                   decoration: InputDecoration(
                                     hintText: 'Enter 10-digit phone number',
-                                    hintStyle: TextStyle(color: Colors.grey[400]),
-                                    prefixIcon: Icon(Icons.phone_outlined, color: Colors.grey[600]),
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.phone_outlined,
+                                      color: Colors.grey[600],
+                                    ),
                                     prefixText: '+91 ',
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF4CAF50),
+                                        width: 2,
+                                      ),
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.red),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -451,12 +517,18 @@ class _SignupPageState extends State<SignupPage> {
                                 TextFormField(
                                   controller: _passwordController,
                                   validator: _validatePassword,
-                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                   obscureText: _obscurePassword,
                                   decoration: InputDecoration(
                                     hintText: 'Enter your password',
-                                    hintStyle: TextStyle(color: Colors.grey[400]),
-                                    prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color: Colors.grey[600],
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscurePassword
@@ -465,28 +537,43 @@ class _SignupPageState extends State<SignupPage> {
                                         color: Colors.grey[600],
                                       ),
                                       onPressed: () {
-                                        setState(() => _obscurePassword = !_obscurePassword);
+                                        setState(
+                                          () => _obscurePassword =
+                                              !_obscurePassword,
+                                        );
                                       },
                                     ),
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF4CAF50),
+                                        width: 2,
+                                      ),
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.red),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -503,12 +590,18 @@ class _SignupPageState extends State<SignupPage> {
                                 TextFormField(
                                   controller: _confirmPasswordController,
                                   validator: _validateConfirmPassword,
-                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                   obscureText: _obscureConfirmPassword,
                                   decoration: InputDecoration(
                                     hintText: 'Re-enter your password',
-                                    hintStyle: TextStyle(color: Colors.grey[400]),
-                                    prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color: Colors.grey[600],
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscureConfirmPassword
@@ -517,28 +610,43 @@ class _SignupPageState extends State<SignupPage> {
                                         color: Colors.grey[600],
                                       ),
                                       onPressed: () {
-                                        setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                                        setState(
+                                          () => _obscureConfirmPassword =
+                                              !_obscureConfirmPassword,
+                                        );
                                       },
                                     ),
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.black26),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
                                     ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF4CAF50),
+                                        width: 2,
+                                      ),
                                     ),
                                     errorBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(color: Colors.red),
+                                      borderSide: const BorderSide(
+                                        color: Colors.red,
+                                      ),
                                     ),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 16,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 32),
@@ -547,7 +655,9 @@ class _SignupPageState extends State<SignupPage> {
                                   onPressed: _loading ? null : _handleSignup,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF4CAF50),
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -555,21 +665,24 @@ class _SignupPageState extends State<SignupPage> {
                                   ),
                                   child: _loading
                                       ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  )
+                                          height: 24,
+                                          width: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
                                       : const Text(
-                                    'Sign Up',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                          'Sign Up',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                 ),
                                 const SizedBox(height: 20),
 

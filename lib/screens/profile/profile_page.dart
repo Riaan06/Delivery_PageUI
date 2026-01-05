@@ -5,8 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'profile_controller.dart';
 import '../auth/login_page.dart';
+import '../auth/auth_controller.dart';
 import '../earnings/earnings_summary_page.dart';
 import '../settings/language_page.dart';
+import '../kyc/kyc_page.dart';
 import 'widgets/profile_header.dart';
 import '../../core/app_localizations.dart';
 
@@ -89,6 +91,8 @@ class ProfilePage extends StatelessWidget {
 
                 // Account Section
                 _buildSectionHeader(localizations.translate('account')),
+                const SizedBox(height: 8),
+                _buildKYCStatusCard(context),
                 const SizedBox(height: 8),
                 _buildMenuItem(
                   icon: Icons.description,
@@ -242,6 +246,101 @@ class ProfilePage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildKYCStatusCard(BuildContext context) {
+    final auth = context.watch<AuthController>();
+    final isKYCCompleted = auth.user?.kycCompleted ?? false;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        gradient: isKYCCompleted
+            ? LinearGradient(
+                colors: [Colors.green.shade400, Colors.green.shade600],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : LinearGradient(
+                colors: [Colors.orange.shade400, Colors.orange.shade600],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: (isKYCCompleted ? Colors.green : Colors.orange).withOpacity(
+              0.3,
+            ),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: !isKYCCompleted
+              ? () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const KYCPage()),
+                )
+              : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    isKYCCompleted ? Icons.verified : Icons.verified_user,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isKYCCompleted ? 'KYC Completed' : 'Complete Your KYC',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isKYCCompleted
+                            ? 'Your account is verified'
+                            : 'Verify identity to unlock features',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isKYCCompleted)
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
