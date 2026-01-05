@@ -148,6 +148,81 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _handleDelivered(
+    BuildContext context,
+    HomeController home,
+    String deliveryId,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Complete Delivery'),
+        content: const Text('Mark this delivery as completed?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              home.markDeliveryCompleted(deliveryId);
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Delivery completed! Moving to next order.'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.green),
+            child: const Text('Complete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleCancel(
+    BuildContext context,
+    HomeController home,
+    String deliveryId,
+  ) {
+    print('Cancel button tapped for delivery: $deliveryId');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel Delivery'),
+        content: const Text(
+          'Are you sure you want to cancel this delivery? This will move to the next order.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              print('Cancel dialog - No button pressed');
+              Navigator.pop(ctx);
+            },
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              print('Cancel dialog - Yes button pressed');
+              home.markDeliveryCancelled(deliveryId);
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Delivery cancelled. Moving to next order.'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final home = context.watch<HomeController>();
@@ -185,10 +260,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {},
             icon: const Icon(Icons.notifications, color: Colors.black),
           ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Share'),
-          ),
+          TextButton(onPressed: () {}, child: const Text('Share')),
         ],
       ),
       body: SingleChildScrollView(
@@ -262,10 +334,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 16),
 
             // Swipe Toggle Button
-            SwipeToggleButton(
-              isOnline: isOnline,
-              onToggle: home.toggleOnline,
-            ),
+            SwipeToggleButton(isOnline: isOnline, onToggle: home.toggleOnline),
 
             const SizedBox(height: 16),
 
@@ -315,7 +384,21 @@ class _HomePageState extends State<HomePage> {
 
             // Current Delivery
             if (current != null) ...[
-              CurrentDeliveryCard(delivery: current),
+              CurrentDeliveryCard(
+                delivery: current,
+                onCall: () {
+                  // Call functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Calling customer...')),
+                  );
+                },
+                onDelivered: () {
+                  _handleDelivered(context, home, current.id);
+                },
+                onCancel: () {
+                  _handleCancel(context, home, current.id);
+                },
+              ),
               const SizedBox(height: 16),
             ],
 
@@ -341,10 +424,7 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 30),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 30), blurRadius: 8),
         ],
       ),
       child: Column(
@@ -368,10 +448,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 4),
           const Text(
             '25 Tiffins Ready',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.grey, fontSize: 12),
           ),
           const SizedBox(height: 8),
           Container(
@@ -386,10 +463,7 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(width: 6),
                 Text(
                   'Pickup: 10:15 - 10:45 AM',
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.orange, fontSize: 12),
                 ),
               ],
             ),
@@ -418,10 +492,7 @@ class _HomePageState extends State<HomePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 30),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 30), blurRadius: 8),
         ],
       ),
       child: Column(
@@ -435,8 +506,10 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(8),
@@ -540,8 +613,10 @@ class _SwipeToggleButtonState extends State<SwipeToggleButton> {
               },
               onHorizontalDragUpdate: (details) {
                 setState(() {
-                  _dragPosition = (_dragPosition + details.delta.dx)
-                      .clamp(0.0, maxDrag);
+                  _dragPosition = (_dragPosition + details.delta.dx).clamp(
+                    0.0,
+                    maxDrag,
+                  );
                 });
               },
               onHorizontalDragEnd: (details) {
@@ -573,7 +648,9 @@ class _SwipeToggleButtonState extends State<SwipeToggleButton> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      widget.isOnline ? Icons.verified : Icons.do_not_disturb_on,
+                      widget.isOnline
+                          ? Icons.verified
+                          : Icons.do_not_disturb_on,
                       color: Colors.white,
                       size: 20,
                     ),

@@ -8,7 +8,10 @@ import 'package:deliveryui/screens/nav/bottom_nav.dart';
 import 'package:deliveryui/screens/nav/nav_controller.dart';
 import 'package:deliveryui/screens/profile/profile_controller.dart';
 import 'package:deliveryui/screens/splash/splash_screen.dart';
+import 'package:deliveryui/core/locale_provider.dart';
+import 'package:deliveryui/core/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
@@ -19,9 +22,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // DO NOT sign out here – let Firebase keep the session
   final User? user = FirebaseAuth.instance.currentUser;
@@ -39,6 +40,7 @@ class DeliveryBoyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => NavController()),
         ChangeNotifierProvider(create: (_) => ProfileController()),
         ChangeNotifierProvider(create: (_) => HomeController()),
@@ -46,20 +48,40 @@ class DeliveryBoyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => EarningsController()),
         ChangeNotifierProvider(create: (_) => AuthController()),
       ],
-      child: MaterialApp(
-        title: 'Tiffinity Delivery Partner',
-        theme: ThemeData(
-          primarySwatch: Colors.green,
-          useMaterial3: true,
-        ),
-        // ⬇️ START WITH SPLASH SCREEN
-        home: SplashScreen(isLoggedIn: isLoggedIn),
-        // ⬇️ ADD ROUTES
-        routes: {
-          '/home': (context) => const BottomNav(),
-          '/login': (context) => const LoginPage(),
+      child: Consumer<LocaleProvider>(
+        builder: (context, localeProvider, child) {
+          return MaterialApp(
+            title: 'Tiffinity Delivery Partner',
+            theme: ThemeData(primarySwatch: Colors.green, useMaterial3: true),
+            locale: localeProvider.locale,
+            supportedLocales: const [
+              Locale('en'),
+              Locale('hi'),
+              Locale('mr'),
+              Locale('gu'),
+              Locale('ta'),
+              Locale('te'),
+              Locale('kn'),
+              Locale('ml'),
+              Locale('bn'),
+              Locale('pa'),
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            // ⬇️ START WITH SPLASH SCREEN
+            home: SplashScreen(isLoggedIn: isLoggedIn),
+            // ⬇️ ADD ROUTES
+            routes: {
+              '/home': (context) => const BottomNav(),
+              '/login': (context) => const LoginPage(),
+            },
+            debugShowCheckedModeBanner: false,
+          );
         },
-        debugShowCheckedModeBanner: false,
       ),
     );
   }

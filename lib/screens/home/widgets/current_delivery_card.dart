@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/delivery_model.dart';
 import '../../map/osm_navigation_screen.dart';
+import '../../chat/chat_screen.dart';
 
 class CurrentDeliveryCard extends StatelessWidget {
   final DeliveryModel delivery;
@@ -29,6 +30,86 @@ class CurrentDeliveryCard extends StatelessWidget {
     );
   }
 
+  void _showContactOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Contact Customer',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.call, color: Colors.green),
+              ),
+              title: const Text(
+                'Call Customer',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Start a voice call'),
+              onTap: () {
+                Navigator.pop(context);
+                if (onCall != null) {
+                  onCall!();
+                }
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.chat_bubble, color: Colors.orange),
+              ),
+              title: const Text(
+                'Text Customer',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('Send a message'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreen(
+                      customerName: delivery.customerName,
+                      orderId: delivery.id,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -50,17 +131,17 @@ class CurrentDeliveryCard extends StatelessWidget {
         children: [
           Text(
             delivery.customerName,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 18, color: Colors.grey),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 18,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -73,13 +154,15 @@ class CurrentDeliveryCard extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.access_time,
-                  size: 18, color: Colors.orange),
+              const Icon(Icons.access_time, size: 18, color: Colors.orange),
               const SizedBox(width: 6),
               Text('ETA: ${delivery.eta}'),
               const SizedBox(width: 16),
-              const Icon(Icons.inventory_2_outlined,
-                  size: 18, color: Colors.green),
+              const Icon(
+                Icons.inventory_2_outlined,
+                size: 18,
+                color: Colors.green,
+              ),
               const SizedBox(width: 6),
               Text(delivery.item),
             ],
@@ -95,10 +178,10 @@ class CurrentDeliveryCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               _smallActionButton(
-                icon: Icons.call,
-                label: 'Call',
+                icon: Icons.phone_in_talk,
+                label: 'Call/Text',
                 color: Colors.green,
-                onTap: onCall,
+                onTap: () => _showContactOptions(context),
               ),
             ],
           ),
@@ -114,7 +197,14 @@ class CurrentDeliveryCard extends StatelessWidget {
               _outlineButton(
                 label: 'Cancel',
                 color: Colors.red,
-                onTap: onCancel,
+                onTap: () {
+                  print('Cancel button in CurrentDeliveryCard tapped');
+                  if (onCancel != null) {
+                    onCancel!();
+                  } else {
+                    print('ERROR: onCancel callback is null!');
+                  }
+                },
               ),
             ],
           ),
@@ -146,10 +236,7 @@ class CurrentDeliveryCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600, color: color),
               ),
             ],
           ),
@@ -205,10 +292,7 @@ class CurrentDeliveryCard extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: color, fontWeight: FontWeight.w600),
             ),
           ),
         ),

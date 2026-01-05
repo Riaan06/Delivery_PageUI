@@ -31,4 +31,40 @@ class HomeController extends ChangeNotifier {
     _isOnline = !_isOnline;
     notifyListeners();
   }
+
+  void markDeliveryCompleted(String id) {
+    final list = deliveryRepo.getAllDeliveries();
+    final index = list.indexWhere((d) => d.id == id);
+    if (index == -1) return;
+
+    list[index] = DeliveryModel(
+      id: list[index].id,
+      customerName: list[index].customerName,
+      item: list[index].item,
+      address: list[index].address,
+      latitude: list[index].latitude,
+      longitude: list[index].longitude,
+      eta: list[index].eta,
+      status: 'Completed',
+    );
+    notifyListeners();
+  }
+
+  void markDeliveryCancelled(String id) {
+    final list = deliveryRepo.getAllDeliveries();
+    final index = list.indexWhere((d) => d.id == id);
+    if (index == -1) return;
+
+    list[index] = DeliveryModel(
+      id: list[index].id,
+      customerName: list[index].customerName,
+      item: list[index].item,
+      address: list[index].address,
+      latitude: list[index].latitude,
+      longitude: list[index].longitude,
+      eta: list[index].eta,
+      status: 'Cancelled',
+    );
+    notifyListeners();
+  }
 }

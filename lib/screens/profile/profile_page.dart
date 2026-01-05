@@ -5,22 +5,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'profile_controller.dart';
 import '../auth/login_page.dart';
+import '../earnings/earnings_summary_page.dart';
+import '../settings/language_page.dart';
 import 'widgets/profile_header.dart';
+import '../../core/app_localizations.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Consumer<ProfileController>(
       builder: (context, controller, _) {
         if (controller.isLoading) {
           return Scaffold(
             backgroundColor: Colors.grey[50],
             appBar: AppBar(
-              title: const Text(
-                'Profile',
-                style: TextStyle(color: Colors.black),
+              title: Text(
+                localizations.translate('profile'),
+                style: const TextStyle(color: Colors.black),
               ),
               backgroundColor: Colors.white,
               elevation: 0,
@@ -32,9 +36,9 @@ class ProfilePage extends StatelessWidget {
         return Scaffold(
           backgroundColor: Colors.grey[50],
           appBar: AppBar(
-            title: const Text(
-              'Profile',
-              style: TextStyle(color: Colors.black),
+            title: Text(
+              localizations.translate('profile'),
+              style: const TextStyle(color: Colors.black),
             ),
             backgroundColor: Colors.white,
             elevation: 0,
@@ -71,9 +75,9 @@ class ProfilePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Edit Profile',
-                      style: TextStyle(
+                    child: Text(
+                      localizations.translate('edit_profile'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -84,25 +88,25 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Account Section
-                _buildSectionHeader('Account'),
+                _buildSectionHeader(localizations.translate('account')),
                 const SizedBox(height: 8),
                 _buildMenuItem(
                   icon: Icons.description,
-                  title: 'Documents',
+                  title: localizations.translate('documents'),
                   onTap: () {
                     // Navigate to documents
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.electric_bike,
-                  title: 'Vehicle Details',
+                  title: localizations.translate('vehicle_details'),
                   onTap: () {
                     // Navigate to vehicle details
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.account_balance,
-                  title: 'Bank Details',
+                  title: localizations.translate('bank_details'),
                   onTap: () {
                     // Navigate to bank details
                   },
@@ -111,18 +115,23 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Performance Section
-                _buildSectionHeader('Performance'),
+                _buildSectionHeader(localizations.translate('performance')),
                 const SizedBox(height: 8),
                 _buildMenuItem(
                   icon: Icons.currency_rupee,
-                  title: 'Earnings Summary',
+                  title: localizations.translate('earnings_summary'),
                   onTap: () {
-                    // Navigate to earnings
+                    print('Navigating to Earnings Summary...');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const EarningsSummaryPage(),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.bar_chart,
-                  title: 'Delivery Stats',
+                  title: localizations.translate('delivery_stats'),
                   onTap: () {
                     // Navigate to stats
                   },
@@ -131,25 +140,30 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Settings Section
-                _buildSectionHeader('Settings'),
+                _buildSectionHeader(localizations.translate('settings')),
                 const SizedBox(height: 8),
                 _buildMenuItem(
                   icon: Icons.schedule,
-                  title: 'Availability',
+                  title: localizations.translate('availability'),
                   onTap: () {
                     // Navigate to availability
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.language,
-                  title: 'Language',
+                  title: localizations.translate('language'),
                   onTap: () {
-                    // Navigate to language
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LanguagePage(),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.notifications,
-                  title: 'Notifications',
+                  title: localizations.translate('notifications'),
                   onTap: () {
                     // Navigate to notifications
                   },
@@ -158,18 +172,18 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Support Section
-                _buildSectionHeader('Support'),
+                _buildSectionHeader(localizations.translate('support')),
                 const SizedBox(height: 8),
                 _buildMenuItem(
                   icon: Icons.help_center,
-                  title: 'Help Center',
+                  title: localizations.translate('help_center'),
                   onTap: () {
                     // Navigate to help center
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.contact_support,
-                  title: 'Contact Support',
+                  title: localizations.translate('contact_support'),
                   onTap: () {
                     // Navigate to contact support
                   },
@@ -192,9 +206,8 @@ class ProfilePage extends StatelessWidget {
                         if (!context.mounted) return;
 
                         Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (_) => const LoginPage()),
-                              (route) => false,
+                          MaterialPageRoute(builder: (_) => const LoginPage()),
+                          (route) => false,
                         );
 
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -205,9 +218,9 @@ class ProfilePage extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.logout, color: Colors.red),
-                    label: const Text(
-                      'Logout',
-                      style: TextStyle(
+                    label: Text(
+                      localizations.translate('logout'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.red,
@@ -277,19 +290,10 @@ class ProfilePage extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
-        trailing: const Icon(
-          Icons.chevron_right,
-          color: Colors.grey,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 4,
-        ),
+        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       ),
     );
   }
@@ -322,20 +326,21 @@ class ProfilePage extends StatelessWidget {
   }
 
   Future<bool?> _showLogoutDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(localizations.translate('logout')),
+        content: Text(localizations.translate('logout_confirmation')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(localizations.translate('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout'),
+            child: Text(localizations.translate('logout')),
           ),
         ],
       ),
